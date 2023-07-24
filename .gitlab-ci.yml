@@ -1,0 +1,30 @@
+image: node:17-alpine3.14
+
+variables:
+  NETLIFY_SITE_ID: $NETLIFY_SITE_ID
+  NETLIFY_AUTH_TOKEN: $NETLIFY_AUTH_TOKEN
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  tags:
+    - dalfcs_docker_kvm
+  script:
+    - npm ci
+    - apk add --no-cache zip curl
+    - npm run build
+    - npm install netlify-cli --save-dev
+    - npx netlify deploy --prod --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --dir dist/
+  artifacts:
+    paths:
+      - dist
+  cache:
+    paths:
+      - .npm/
+    key:
+      files:
+        - package-lock.json
+  only: 
+  - main      
